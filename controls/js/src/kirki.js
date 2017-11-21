@@ -24,11 +24,68 @@ var kirki = {
 	},
 
 	/**
+	 * Set and get controls.
+	 * Useful to avoid lots of code duplication.
+	 *
+	 * @since 3.0.17
+	 */
+	Control: {
+
+		/**
+		 * Store controls.
+		 * Caching & avoids code duplication.
+		 *
+		 * @since 3.0.17
+		 * @var {Object}
+		 */
+		_controls: {},
+
+		/**
+		 * Store a control in this._controls.
+		 *
+		 * @since 3.0.17
+		 * @param {Object} args - All the control arguments.
+		 * @returns {void}
+		 */
+		set: function( args ) {
+			var id   = ( args.id ) ? args.id : false,
+			    self = this;
+
+			if ( ! id && args['data-id'] ) {
+				id = args['data-id'];
+			}
+
+			// If no ID then there's no reason to proceed.
+			if ( ! id ) {
+				return;
+			}
+
+			args.id = id;
+			self._controls[ id ] = args;
+		},
+
+		/**
+		 * Gets a control that we have already set.
+		 * Returns false if the control does not exist.
+		 *
+		 * @since 3.0.17
+		 * @param {string} id - The control ID.
+		 * @returns {Object}
+		 */
+		get: function( id ) {
+			if ( 'undefined' === typeof this._controls[ id ] || ! this._controls[ id ] ) {
+				return;
+			}
+			return this._controls[ id ];
+		}
+	},
+
+	/**
 	 * An object containing definitions for controls.
 	 *
 	 * @since 3.0.16
 	 */
-	control: {
+	Controls: {
 
 		/**
 		 * The radio control.
@@ -51,7 +108,7 @@ var kirki = {
 				self.template( control );
 
 				// Init the control.
-				kirki.input.radio.init( control );
+				kirki.Input.radio.init( control );
 
 			},
 
@@ -70,13 +127,13 @@ var kirki = {
 			 * @returns {void}
 			 */
 			template: function( control ) {
-				control.container.html( kirki.input.radio.getTemplate( {
+				control.container.html( kirki.Input.radio.getTemplate( {
 					label: control.params.label,
 					description: control.params.description,
 					'data-id': control.id,
 					inputAttrs: control.params.inputAttrs,
 					'default': control.params['default'],
-					value: kirki.setting.get( control.id ),
+					value: kirki.Setting.get( control.id ),
 					choices: control.params.choices
 				} ) );
 			}
@@ -103,7 +160,7 @@ var kirki = {
 				self.template( control );
 
 				// Init the control.
-				kirki.input.color.init( control );
+				kirki.Input.color.init( control );
 
 			},
 
@@ -127,7 +184,7 @@ var kirki = {
 			 * @returns {void}
 			 */
 			template: function( control ) {
-				control.container.html( kirki.input.color.getTemplate( {
+				control.container.html( kirki.Input.color.getTemplate( {
 					label: control.params.label,
 					description: control.params.description,
 					'data-id': control.id,
@@ -136,7 +193,7 @@ var kirki = {
 					'data-palette': control.params.palette,
 					'data-default-color': control.params['default'],
 					'data-alpha': control.params.choices.alpha,
-					value: kirki.setting.get( control.id )
+					value: kirki.Setting.get( control.id )
 				} ) );
 			}
 		},
@@ -166,10 +223,10 @@ var kirki = {
 
 				// Init the control.
 				if ( ! _.isUndefined( control.params ) && ! _.isUndefined( control.params.choices ) && ! _.isUndefined( control.params.choices.element ) && 'textarea' === control.params.choices.element ) {
-					kirki.input.textarea.init( control );
+					kirki.Input.textarea.init( control );
 					return;
 				}
-				kirki.input.genericInput.init( control );
+				kirki.Input.genericInput.init( control );
 			},
 
 			/**
@@ -194,14 +251,14 @@ var kirki = {
 						'data-id': control.id,
 						inputAttrs: control.params.inputAttrs,
 						choices: control.params.choices,
-						value: kirki.setting.get( control.id )
+						value: kirki.Setting.get( control.id )
 				    };
 
 				if ( ! _.isUndefined( control.params ) && ! _.isUndefined( control.params.choices ) && ! _.isUndefined( control.params.choices.element ) && 'textarea' === control.params.choices.element ) {
-					control.container.html( kirki.input.textarea.getTemplate( args ) );
+					control.container.html( kirki.Input.textarea.getTemplate( args ) );
 					return;
 				}
-				control.container.html( kirki.input.genericInput.getTemplate( args ) );
+				control.container.html( kirki.Input.genericInput.getTemplate( args ) );
 			}
 		},
 
@@ -221,7 +278,7 @@ var kirki = {
 				self.template( control );
 
 				// Init the control.
-				kirki.input.select.init( control );
+				kirki.Input.select.init( control );
 			},
 
 			/**
@@ -245,10 +302,10 @@ var kirki = {
 						'data-id': control.id,
 						inputAttrs: control.params.inputAttrs,
 						choices: control.params.choices,
-						value: kirki.setting.get( control.id )
+						value: kirki.Setting.get( control.id )
 				    };
 
-				control.container.html( kirki.input.select.getTemplate( args ) );
+				control.container.html( kirki.Input.select.getTemplate( args ) );
 			}
 		},
 
@@ -297,105 +354,103 @@ var kirki = {
 				if ( control.params['default']['font-family'] ) {
 
 					// Font-family.
-					html += '<div class="font-family">';
-					html += kirki.input.select.getTemplate( {
+					kirki.Control.set( {
 						label: 'Font Family', // TODO: i18n
 						inputAttrs: 'placeholder="Select Font Family"', // TODO: i18n
 						'data-id': control.id + '[font-family]',
-						value: kirki.setting.get( control.id + '[font-family]' )
+						'default': control.params['default']['font-family']
 					} );
-					html += '</div>';
+					html += '<div class="font-family">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[font-family]' ) ) + '</div>';
+					kirki.Input.select.init( kirki.Control.get( control.id + '[font-family]' ) );
 
 					// Font-backup.
-					html += '<div class="font-family">';
-					html += kirki.input.select.getTemplate( {
+					kirki.Control.set( {
 						label: 'Backup Font', // TODO: i18n
 						inputAttrs: 'placeholder="Select Font Family"', // TODO: i18n
 						'data-id': control.id + '[font-backup]',
-						value: kirki.setting.get( control.id + '[font-backup]' )
+						'default': control.params['default']['font-backup']
 					} );
-					html += '</div>';
+					html += '<div class="font-backup">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[font-backup]' ) ) + '</div>';
+					// Kirki.Input.select.init( kirki.Control.get( control.id + '[font-backup]' ) );
 
 					// Variants.
 					// TODO: <# if ( true === data.show_variants || false !== data.default.variant ) { #>
-					html += '<div class="variant kirki-variant-wrapper">';
-					html += kirki.input.select.getTemplate( {
+					kirki.Control.set( {
 						label: 'Variant', // TODO: i18n
 						inputAttrs: 'placeholder="Select Variant"', // TODO: i18n
 						'data-id': control.id + '[variant]',
-						value: kirki.setting.get( control.id + '[variant]' )
+						'default': control.params['default'].variant
 					} );
-					html += '</div>';
+					html += '<div class="variant">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[variant]' ) ) + '</div>';
+					// Kirki.Input.select.init( kirki.Control.get( control.id + '[variant]' ) );
 
 					// Subsets.
 					// TODO: <# if ( true === data.show_subsets ) { #>
-					html += '<div class="subsets hide-on-standard-fonts kirki-subsets-wrapper">';
-					html += kirki.input.select.getTemplate( {
+					kirki.Control.set( {
 						label: 'Subset(s)', // TODO: i18n
 						inputAttrs: 'placeholder="Select Subsets"', // TODO: i18n
 						'data-id': control.id + '[subsets]',
-						value: kirki.setting.get( control.id + '[subsets]' ),
+						'default': control.params['default'].subsets,
 						multiple: 99
 					} );
-					html += '</div>';
-
+					html += '<div class="subsets">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[subsets]' ) ) + '</div>';
+					// Kirki.Input.select.init( kirki.Control.get( control.id + '[subsets]' ) );
 				}
 
 				// Font Size.
 				if ( control.params['default']['font-size'] ) {
-					html += '<div class="font-size">';
-					html += kirki.input.genericInput.getTemplate( {
+					kirki.Control.set( {
 						label: 'Font Size', // TODO: i18n
 						inputAttrs: 'type="text"',
 						'data-id': control.id + '[font-size]',
-						value: kirki.setting.get( control.id + '[font-size]' )
+						'default': control.params['default']['font-size']
 					} );
-					html += '</div>';
+					html += '<div class="font-size">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[font-size]' ) ) + '</div>';
+					kirki.Input.genericInput.init( kirki.Control.get( control.id + '[font-size]' ) );
 				}
 
 				// Line Height.
 				if ( control.params['default']['line-height'] ) {
-					html += '<div class="line-height">';
-					html += kirki.input.genericInput.getTemplate( {
+					kirki.Control.set( {
 						label: 'Line Height', // TODO: i18n
 						inputAttrs: 'type="text"',
 						'data-id': control.id + '[line-height]',
-						value: kirki.setting.get( control.id + '[line-height]' )
+						'default': control.params['default']['line-height']
 					} );
-					html += '</div>';
+					html += '<div class="line-height">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[line-height]' ) ) + '</div>';
+					kirki.Input.genericInput.init( kirki.Control.get( control.id + '[line-height]' ) );
 				}
 
 				// Letter Spacing.
 				if ( control.params['default']['letter-spacing'] ) {
-					html += '<div class="letter-spacing">';
-					html += kirki.input.genericInput.getTemplate( {
+					kirki.Control.set( {
 						label: 'Letter Spacing', // TODO: i18n
 						inputAttrs: 'type="text"',
 						'data-id': control.id + '[letter-spacing]',
-						value: kirki.setting.get( control.id + '[letter-spacing]' )
+						'default': control.params['default']['letter-spacing']
 					} );
-					html += '</div>';
+					html += '<div class="letter-spacing">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[letter-spacing]' ) ) + '</div>';
+					kirki.Input.genericInput.init( kirki.Control.get( control.id + '[letter-spacing]' ) );
 				}
 
 				// Word Spacing.
 				if ( control.params['default']['word-spacing'] ) {
-					html += '<div class="word-spacing">';
-					html += kirki.input.genericInput.getTemplate( {
+					kirki.Control.set( {
 						label: 'Word Spacing', // TODO: i18n
 						inputAttrs: 'type="text"',
 						'data-id': control.id + '[word-spacing]',
-						value: kirki.setting.get( control.id + '[word-spacing]' )
+						'default': control.params['default']['word-spacing']
 					} );
-					html += '</div>';
+					html += '<div class="word-spacing">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[word-spacing]' ) ) + '</div>';
+					kirki.Input.genericInput.init( kirki.Control.get( control.id + '[word-spacing]' ) );
 				}
 
 				// Text Align.
 				if ( control.params['default']['text-align'] ) {
-					html += '<div class="text-align">';
-					html += kirki.input.radio.getTemplate( {
+					kirki.Control.set( {
 						label: 'Text Align', // TODO: i18n
 						'data-id': control.id + '[text-align]',
-						value: kirki.setting.get( control.id + '[text-align]' ),
+						'default': control.params['default']['text-align'],
 						choices: {
 							inherit: '<span class="dashicons dashicons-editor-removeformatting"></span><span class="screen-reader-text">Inherit</span>', // TODO: i18n
 							left: '<span class="dashicons dashicons-editor-alignleft"></span><span class="screen-reader-text">Left</span>', // TODO: i18n
@@ -404,16 +459,16 @@ var kirki = {
 							justify: '<span class="dashicons dashicons-editor-justify"></span><span class="screen-reader-text">Justify</span>' // TODO: i18n
 						}
 					} );
-					html += '</div>';
+					html += '<div class="text-align">' + kirki.Input.radio.getTemplate( kirki.Control.get( control.id + '[text-align]' ) ) + '</div>';
+					kirki.Input.radio.init( kirki.Control.get( control.id + '[text-align]' ) );
 				}
 
 				// Text Transform.
 				if ( control.params['default']['text-transform'] ) {
-					html += '<div class="text-transform">';
-					html += kirki.input.select.getTemplate( {
+					kirki.Control.set( {
 						label: 'Text Transform',
 						'data-id': control.id + '[text-transform]',
-						value: kirki.setting.get( control.id + '[text-transform]' ),
+						'default': control.params['default']['text-transform'],
 						choices: {
 							none: 'None', // TODO: i18n
 							capitalize: 'Capitalize',  // TODO: i18n
@@ -423,7 +478,43 @@ var kirki = {
 							inherit: 'Inherit' // TODO: i18n
 						}
 					} );
-					html += '</div>';
+					html += '<div class="text-transform">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[text-transform]' ) ) + '</div>';
+					kirki.Input.select.init( kirki.Control.get( control.id + '[text-transform]' ) );
+				}
+
+				// Color.
+				if ( control.params['default'].color ) {
+					kirki.Control.set( {
+						label: 'Color', // TODO: i18n
+						'data-id': control.id + '[color]',
+						'default': control.params['default'].color
+					} );
+					html += '<div class="color">' + kirki.Input.color.getTemplate( kirki.Control.get( control.id + '[color]' ) ) + '</div>';
+					kirki.Input.color.init( kirki.Control.get( control.id + '[color]' ) );
+				}
+
+				// Margin-top
+				if ( control.params['default']['margin-top'] ) {
+					kirki.Control.set( {
+						label: 'Margin Top', // TODO: i18n
+						inputAttrs: 'type="text"',
+						'data-id': control.id + '[margin-top]',
+						'default': control.params['default']['margin-top']
+					} );
+					html += '<div class="margin-top">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[margin-top]' ) ) + '</div>';
+					kirki.genericInput.select.init( kirki.Control.get( control.id + '[margin-top]' ) );
+				}
+
+				// Margin-bottom
+				if ( control.params['default']['margin-bottom'] ) {
+					kirki.Control.set( {
+						label: 'Margin Bottom', // TODO: i18n
+						inputAttrs: 'type="text"',
+						'data-id': control.id + '[margin-bottom]',
+						'default': control.params['default']['margin-bottom']
+					} );
+					html += '<div class="margin-bottom">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[margin-bottom]' ) ) + '</div>';
+					kirki.genericInput.select.init( kirki.Control.get( control.id + '[margin-bottom]' ) );
 				}
 
 				html += '</div>';
@@ -438,7 +529,7 @@ var kirki = {
 	 *
 	 * @since 3.0.16
 	 */
-	input: {
+	Input: {
 
 		/**
 		 * Radio input fields.
@@ -467,10 +558,12 @@ var kirki = {
 					label: '',
 					description: '',
 					inputAttrs: '',
-					value: '',
 					'data-id': '',
 					'default': ''
 				} );
+
+				data.id = ( _.isUndefined( data.id ) && ! _.isUndefined( data['data-id'] ) ) ? data['data-id'] : data.id;
+				data.value = ( ! data.value ) ? kirki.Setting.get( data.id ) : data.value;
 
 				if ( ! data.choices ) {
 					return;
@@ -505,7 +598,7 @@ var kirki = {
 
 				// Save the value
 				input.on( 'change keyup paste click', function() {
-					kirki.setting.set( control.id, jQuery( this ).val() );
+					kirki.Setting.set( control.id, jQuery( this ).val() );
 				});
 			}
 		},
@@ -536,9 +629,11 @@ var kirki = {
 					'data-palette': data['data-palette'] ? data['data-palette'] : true,
 					'data-default-color': data['data-default-color'] ? data['data-default-color'] : '',
 					'data-alpha': data['data-alpha'] ? data['data-alpha'] : false,
-					value: '',
 					'data-id': ''
 				} );
+
+				data.id = ( _.isUndefined( data.id ) && ! _.isUndefined( data['data-id'] ) ) ? data['data-id'] : data.id;
+				data.value = ( ! data.value ) ? kirki.Setting.get( data.id ) : data.value;
 
 				html += '<label>';
 				if ( data.label ) {
@@ -595,7 +690,7 @@ var kirki = {
 
 						// Small hack: the picker needs a small delay
 						setTimeout( function() {
-							kirki.setting.set( control.id, picker.val() );
+							kirki.Setting.set( control.id, picker.val() );
 						}, 20 );
 					}
 				});
@@ -627,10 +722,12 @@ var kirki = {
 					label: '',
 					description: '',
 					inputAttrs: '',
-					value: '',
 					'data-id': '',
 					choices: {}
 				} );
+
+				data.id = ( _.isUndefined( data.id ) && ! _.isUndefined( data['data-id'] ) ) ? data['data-id'] : data.id;
+				data.value = ( ! data.value ) ? kirki.Setting.get( data.id ) : data.value;
 
 				html += '<label>';
 				if ( data.label ) {
@@ -668,7 +765,7 @@ var kirki = {
 
 				// Save the value
 				input.on( 'change keyup paste click', function() {
-					kirki.setting.set( control.id, jQuery( this ).val() );
+					kirki.Setting.set( control.id, jQuery( this ).val() );
 				});
 			}
 		},
@@ -694,10 +791,12 @@ var kirki = {
 					label: '',
 					description: '',
 					inputAttrs: '',
-					value: '',
 					'data-id': '',
 					choices: {}
 				} );
+
+				data.id = ( _.isUndefined( data.id ) && ! _.isUndefined( data['data-id'] ) ) ? data['data-id'] : data.id;
+				data.value = ( ! data.value ) ? kirki.Setting.get( data.id ) : data.value;
 
 				html += '<label>';
 				if ( data.label ) {
@@ -731,7 +830,7 @@ var kirki = {
 
 				// Save the value
 				textarea.on( 'change keyup paste click', function() {
-					kirki.setting.set( control.id, jQuery( this ).val() );
+					kirki.Setting.set( control.id, jQuery( this ).val() );
 				});
 			}
 		},
@@ -755,9 +854,11 @@ var kirki = {
 					inputAttrs: '',
 					'data-id': '',
 					choices: {},
-					multiple: 1,
-					value: ( 1 < data.multiple ) ? [] : ''
+					multiple: 1
 				} );
+
+				data.id = ( _.isUndefined( data.id ) && ! _.isUndefined( data['data-id'] ) ) ? data['data-id'] : data.id;
+				data.value = ( ! data.value || _.isEmpty( data.value ) ) ? kirki.Setting.get( data.id ) : data.value;
 
 				if ( 1 < data.multiple && data.value && _.isString( data.value ) ) {
 					data.value = [ data.value ];
@@ -830,7 +931,7 @@ var kirki = {
 				}
 				jQuery( element ).selectWoo( selectWooOptions ).on( 'change', function() {
 					selectValue = jQuery( this ).val();
-					kirki.setting.set( control.id, selectValue );
+					kirki.Setting.set( control.id, selectValue );
 				});
 			}
 		},
@@ -854,9 +955,11 @@ var kirki = {
 					description: '',
 					inputAttrs: '',
 					'data-id': '',
-					choices: {},
-					value: ''
+					choices: {}
 				} );
+
+				data.id = ( _.isUndefined( data.id ) && ! _.isUndefined( data['data-id'] ) ) ? data['data-id'] : data.id;
+				data.value = ( ! data.value ) ? kirki.Setting.get( data.id ) : data.value;
 
 				if ( ! _.isUndefined( data.choices ) && ! _.isUndefined( data.choices.save_as ) ) {
 					saveAs = data.choices.save_as;
@@ -912,7 +1015,7 @@ var kirki = {
 	 *
 	 * @since 3.0.16
 	 */
-	setting: {
+	Setting: {
 
 		/**
 		 * Gets the value of a setting.

@@ -755,6 +755,8 @@ my_config_kirki_add_field(
 			'color'          => '#333333',
 			'text-transform' => 'none',
 			'text-align'     => 'left',
+			'margin-top'     => '13px',
+			'margin-bottom'  => '1em',
 		),
 		'priority'    => 10,
 	)

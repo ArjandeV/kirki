@@ -186,8 +186,8 @@
 		 * @returns {void}
 		 */
 		initKirkiControl: function( control ) {
-			if ( 'undefined' !== typeof kirki.control[ control.params.type ] ) {
-				kirki.control[ control.params.type ].init( control );
+			if ( 'undefined' !== typeof kirki.Controls[ control.params.type ] ) {
+				kirki.Controls[ control.params.type ].init( control );
 				return;
 			}
 
@@ -223,6 +223,6 @@
 	});
 })();
 
-_.each( kirki.control, function( obj, type ) {
+_.each( kirki.Controls, function( obj, type ) {
 	wp.customize.controlConstructor[ type ] = wp.customize.kirkiDynamicControl.extend({});
 } );
