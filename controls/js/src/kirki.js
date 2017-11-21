@@ -371,7 +371,7 @@ var kirki = {
 						'default': control.params['default']['font-backup']
 					} );
 					html += '<div class="font-backup">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[font-backup]' ) ) + '</div>';
-					// Kirki.Input.select.init( kirki.Control.get( control.id + '[font-backup]' ) );
+					kirki.Input.select.init( kirki.Control.get( control.id + '[font-backup]' ) );
 
 					// Variants.
 					// TODO: <# if ( true === data.show_variants || false !== data.default.variant ) { #>
@@ -382,7 +382,7 @@ var kirki = {
 						'default': control.params['default'].variant
 					} );
 					html += '<div class="variant">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[variant]' ) ) + '</div>';
-					// Kirki.Input.select.init( kirki.Control.get( control.id + '[variant]' ) );
+					kirki.Input.select.init( kirki.Control.get( control.id + '[variant]' ) );
 
 					// Subsets.
 					// TODO: <# if ( true === data.show_subsets ) { #>
@@ -394,7 +394,7 @@ var kirki = {
 						multiple: 99
 					} );
 					html += '<div class="subsets">' + kirki.Input.select.getTemplate( kirki.Control.get( control.id + '[subsets]' ) ) + '</div>';
-					// Kirki.Input.select.init( kirki.Control.get( control.id + '[subsets]' ) );
+					kirki.Input.select.init( kirki.Control.get( control.id + '[subsets]' ) );
 				}
 
 				// Font Size.
@@ -502,7 +502,7 @@ var kirki = {
 						'default': control.params['default']['margin-top']
 					} );
 					html += '<div class="margin-top">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[margin-top]' ) ) + '</div>';
-					kirki.genericInput.select.init( kirki.Control.get( control.id + '[margin-top]' ) );
+					kirki.Input.genericInput.init( kirki.Control.get( control.id + '[margin-top]' ) );
 				}
 
 				// Margin-bottom
@@ -514,7 +514,7 @@ var kirki = {
 						'default': control.params['default']['margin-bottom']
 					} );
 					html += '<div class="margin-bottom">' + kirki.Input.genericInput.getTemplate( kirki.Control.get( control.id + '[margin-bottom]' ) ) + '</div>';
-					kirki.genericInput.select.init( kirki.Control.get( control.id + '[margin-bottom]' ) );
+					kirki.Input.genericInput.init( kirki.Control.get( control.id + '[margin-bottom]' ) );
 				}
 
 				html += '</div>';
@@ -665,7 +665,7 @@ var kirki = {
 				    clear;
 
 				control.choices = control.choices || {};
-				if ( _.isEmpty( control.choices ) && control.params.choices ) {
+				if ( _.isEmpty( control.choices ) && control.params && control.params.choices ) {
 					control.choices = control.params.choices;
 				}
 
